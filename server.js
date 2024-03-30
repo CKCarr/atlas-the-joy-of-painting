@@ -6,6 +6,9 @@ dotenv.config({ path: './.env.app' });
 import express from 'express';
 import pg from 'pg';
 
+// import routes from './api' folder
+import apiRoutes from './api/routes.js';
+
 const { Pool, Client } = pg;
 
 // Constants
@@ -26,13 +29,12 @@ const pool = new Pool({
     port: pgPort, // default port for postgres
 });
 
-// routes module
-// const routes = require('./routes/index');
-
 // create an instance of express
 const app = express();
 
-// define a route for get requests to root url '/'
+// Use the imported routes with your Express app
+app.use('/', apiRoutes);
+
 app.get('/', (req, res) => {
     res.send('Welcome to the Joy of Painting API!!');
 });
