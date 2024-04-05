@@ -20,9 +20,6 @@ app.get('/', (req, res) => {
     res.send('Welcome to the Joy of Painting API!!');
 });
 
-
-
-
 // Start the server
 app.listen(PORT, HOST, () => {
     console.log(`Server up and running! Listening on http://${HOST}:${PORT}`);

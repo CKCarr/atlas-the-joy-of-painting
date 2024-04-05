@@ -24,15 +24,15 @@ run_sql_file "database/jop_schema.sql"
 echo "Tables created successfully."
 
 
-psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "COPY episodes FROM '/datasets/episode_dates.csv' DELIMITER ',' CSV HEADER;"
-psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "COPY colors FROM '/datasets/colors_used.csv' DELIMITER ',' CSV HEADER;"
-psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "COPY subjects FROM '/datasets/subject_matter.csv' DELIMITER ',' CSV HEADER;"
+# If tables are already created and you are in the directory containing your CSV files
 
+# Import episodes data
+psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "\copy episodes FROM './datasets/episode_dates.csv' WITH CSV HEADER;"
 
-# Run each SQL file in the specified order
-run_sql_file "database/jop_schema.sql"
-run_sql_file "database/episode_dates_table.sql"
-run_sql_file "database/colors_used_table.sql"
-run_sql_file "database/subject_matter_table.sql"
+# Import subjects data
+psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "\copy subjects FROM './datasets/subject_matter.csv' WITH CSV HEADER;"
+
+# Import colors data
+psql -U $DB_USER -d $DB_NAME -h $DB_HOST -p $DB_PORT -c "\copy colors FROM './datasets/colors_processed.csv' WITH CSV HEADER;"
 
 echo "All SQL files executed successfully."

@@ -1,6 +1,14 @@
 -- Ensure you are connected to your existing database, mypgdb
 -- \c mypgdb
 
+-- Create the episode_dates table
+CREATE TABLE episodes (
+    episode_id SERIAL PRIMARY KEY,
+    title VARCHAR(255),
+    broadcast_date DATE,
+    extra_info VARCHAR(255)
+);
+
 -- Create the colors_used table
 CREATE TABLE colors (
     color_id SERIAL PRIMARY KEY,
@@ -11,8 +19,8 @@ CREATE TABLE colors (
     episode INT,
     num_colors INT,
     youtube_src VARCHAR(255),
-    colors VARCHAR[],
-    color_hex VARCHAR[],
+    colors VARCHAR, -- This will be a JSON string? or an array of strings
+    color_hex VARCHAR, -- This will be a JSON string? or an array of hex values
     black_gesso BOOLEAN,
     bright_red BOOLEAN,
     burnt_umber BOOLEAN,
@@ -33,18 +41,10 @@ CREATE TABLE colors (
     alizarin_crimson BOOLEAN
 );
 
--- Create the episode_dates table
-CREATE TABLE episodes (
-    episode_id SERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    date DATE,
-    extra_info VARCHAR(255)
-);
-
 -- Create the subjects table
 CREATE TABLE subjects (
     subject_id SERIAL PRIMARY KEY,
-    episode VARCHAR(255),
+    season_episode VARCHAR(255),
     title VARCHAR(255),
     apple_frame BOOLEAN,
     aurora_borealis BOOLEAN,

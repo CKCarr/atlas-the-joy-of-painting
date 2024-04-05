@@ -1,21 +1,28 @@
 // etl/insertSubjectMatterData
-import fs from 'fs';
+
+import { parseFile } from 'fast-csv';
 import pool from '../src/db.js';
 
 export const insertSubjectMatterData = async (inputFilePath) => {
-    const inputData = fs.readFileSync(inputFilePath, 'utf8');
-    const lines = inputData.split('\n');
-    const headers = lines[0].split(',').map(header => header.trim());
+    const rows = [];
 
-    for (let i = 1; i < lines.length; i++) {
-        const rowData = lines[i].split(',').map(item => item.trim());
-        const data = {};
-        headers.forEach((header, index) => {
-            data[header] = rowData[index];
-        });
+    // Use fast-csv to parse the file and collect data rows
+    await new Promise((resolve, reject) => {
+        parseFile(inputFilePath, { headers: true, ignoreEmpty: true })
+            .on('error', error => reject(error))
+            .on('data', row => rows.push(Object.values(row)))
+            .on('end', rowCount => {
+                console.log(`Parsed ${rowCount} rows`);
+                resolve();
+            });
+    });
 
-        // Insert data into PostgreSQL table for subject_matter
-        await pool.query(`
+    // Use a transaction to insert all rows into the database
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const insertQuery = `
             INSERT INTO subjects (
                 episode, title, apple_frame, aurora_borealis, barn, beach, boat,
                 bridge, building, bushes, cabin, cactus, circle_frame, cirrus, cliff,
@@ -27,11 +34,16 @@ export const insertSubjectMatterData = async (inputFilePath) => {
                 seashell_frame, snow, snowy_mountain, split_frame, steve_ross, structure,
                 sun, tomb_frame, tree, trees, triple_frame, waterfall, waves, windmill,
                 window_frame, winter, wood_framed
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-                $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
-                $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45,
-                $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60,
-                $61, $62, $63, $64, $65, $66, $67, $68)
-        `, Object.values(data));
+            ) VALUES 
+        ` + rows.map(() => '(' + new Array(68).fill('?').join(',') + ')').join(',');
+
+        await client.query(insertQuery, rows.flat());
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
     }
 };
