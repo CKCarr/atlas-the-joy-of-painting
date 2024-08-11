@@ -2,22 +2,32 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
+  backend:
+    build: ./backend
     ports:
       - "3000:3000"
     depends_on:
       - db
     env_file:
-      - .env.app
+      - ./backend/.env.app
     volumes:
-      - .:/atlas-the-joy-of-painting-api
-      - /atlas-the-joy-of-painting-api/node_modules
+      - ./backend:/app
+      - /app/node_modules
+    command: npm start
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start
 
   db:
     image: postgres:16.2
     env_file:
-      - .env.db
+      - ./backend/.env.db
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:

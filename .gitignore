@@ -25,6 +25,8 @@ ENV/
 env.bak/
 venv.bak/
 venv_name/
+.env.db
+.env.app
 
 # IDE and Editor Directories
 .idea/ (for JetBrains IDEs like IntelliJ and WebStorm)
